@@ -21,7 +21,7 @@ services:
     container_name: app
     #image: laaferreira/node:latest
     entrypoint: dockerize -wait tcp://db:3306 -timeout 30s docker-entrypoint.sh node index.js
-    #command: sh -c "npm install && node index.js"
+    command: sh -c "npm install && node index.js"
     ports:
       - 3000:3000
     volumes:
