@@ -9,6 +9,7 @@ services:
     tty: true
     volumes: 
       - ./mysql:/var/lib/mysql
+      - ./init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
     environment: 
       - MYSQL_DATABASE=nodedb
       - MYSQL_ROOT_PASSWORD=root
@@ -19,14 +20,13 @@ services:
     restart: unless-stopped
     container_name: app
     build: 
-      context: ./
-      dockerfile: Dockerfile
+      context: ./node
     #image: laaferreira/node:latest
-    entrypoint: dockerize -wait tcp://db:3306 -timeout 60s docker-entrypoint.sh
+    entrypoint: dockerize -wait tcp://db:3306 -timeout 30s docker-entrypoint.sh node index.js
     ports:
     - 3000:3000
     volumes:
-      - ./:/usr/src/app
+      - ./node:/usr/src/app
       - /usr/src/app/node_modules
     tty : true
     depends_on:
@@ -36,14 +36,15 @@ services:
 
  
   nginx:
-    restart: unless-stopped
-    image: nginx
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: nginx
     ports:
       - "8080:8080"
     depends_on:
       - app
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - db
     networks:
       - node-network
 
